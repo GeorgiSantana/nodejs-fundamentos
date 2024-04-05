@@ -1,4 +1,5 @@
 import http from 'node:http'
+import { json } from './middiewares/json.js'
 
 // - Criar usuários
 // - Listagem usuários
@@ -29,24 +30,11 @@ const users = []
 const server = http.createServer(async (req, res) => {
    const {method, url} = req
 
-   const buffers = []
-
-   // A sitaxe de (for await) permite percorrer todo o array, e ser garregado ao final da leitura de toda stream.
-       for await (const chunk of req) {
-           buffers.push(chunk)
-       }
-
-       try {
-         req.body = JSON.parse(Buffer.concat(buffers).toString() || '{}')
-         //req.body = JSON.parse(Buffer.concat(buffers).toString())
-       } catch  {
-         req.body = null
-       }
+   await json(req, res)
    
    if (method === "GET" && url === "/users") {
       return res
-      .setHeader('Content-type', 'application/json')
-      .end(JSON.stringify(users))
+       .end(JSON.stringify(users))
    }
 
    if (method === "POST" && url === "/users") {
